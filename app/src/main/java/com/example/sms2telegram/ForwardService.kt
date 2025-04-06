@@ -121,8 +121,9 @@ class ForwardService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (lastForwardTimeStr == null) {
-            val initialNotification = buildNotification("No messages forwarded yet.")
-            startForeground(1, initialNotification)
+            startForeground(1, buildNotification("No messages forwarded yet."))
+        } else {
+            startForeground(1, buildNotification("Last: $lastForwardTimeStr ($lastForwardStatus)"))
         }
         if (intent?.action == "ACTION_SEND_TEST") {
             forwardMessage("Test message at ${currentTime()}")
@@ -138,20 +139,20 @@ class ForwardService : Service() {
         val testIntent = Intent(this, ForwardService::class.java).setAction("ACTION_SEND_TEST")
         val testPending = PendingIntent.getService(this, 1, testIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("SMS Forwarder")
+            .setContentTitle("sms2telegram")
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(openPending)
             .addAction(android.R.drawable.ic_menu_preferences, "Settings", openPending)
-            .addAction(android.R.drawable.ic_menu_send, "Send Test", testPending)
+            .addAction(android.R.drawable.ic_menu_send, "Test", testPending)
             .build()
     }
 
     private fun updateNotification() {
         val text = if (lastForwardTimeStr != null) {
-            "Last forwarded at $lastForwardTimeStr ($lastForwardStatus)"
+            "Last: $lastForwardTimeStr ($lastForwardStatus)"
         } else {
             "No messages forwarded yet."
         }
